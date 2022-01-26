@@ -131,6 +131,12 @@ int main(void)
 
             char data[BUFSIZ] = {0};
             FILE *fp = fopen(filename, "r");
+            fseek(fp, 0, SEEK_END);
+            uint32_t filesize;
+            filesize = ftell(fp);
+
+            char *pbyte;
+            pbyte = (char *) filesize; // want to pass back to client
 
             while(fgets(data, BUFSIZ, fp) != NULL) {
                 if (send(new_fd, data, sizeof(data), 0) == -1)
