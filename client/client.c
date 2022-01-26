@@ -14,10 +14,6 @@
 
 #include <arpa/inet.h>
 
-#define PORT "3490" // the port client will be connecting to 
-
-#define MAXDATASIZE 100 // max number of bytes we can get at once 
-
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -31,7 +27,7 @@ void *get_in_addr(struct sockaddr *sa)
 int main(int argc, char *argv[])
 {
     int sockfd, numbytes, filename;  
-    char buf[MAXDATASIZE];
+    char buf[BUFSIZ];
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
@@ -88,7 +84,10 @@ int main(int argc, char *argv[])
         exit(1);  
     }
 
-    if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+    // receive # of bytes from server (transform from network to host order)
+    // loop until we receive complete file
+
+    if ((numbytes = recv(sockfd, buf, BUFSIZ-1, 0)) == -1) {
         perror("recv");
         exit(1);
     }
