@@ -14,7 +14,6 @@
 
 #include <arpa/inet.h>
 
-#pragma once
 #include <time.h>
 #include <sys/time.h>
 

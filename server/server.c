@@ -135,7 +135,7 @@ int main(void)
             filesize = ftell(fp);
 
             char *pbyte;
-            pbyte = (char *) filesize; // want to pass back to client
+            pbyte = (char *) &filesize; // want to pass back to client
 
             if (send(new_fd, pbyte, strlen(pbyte), 0) == -1)
                     perror("send");
