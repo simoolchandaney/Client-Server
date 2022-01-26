@@ -134,8 +134,8 @@ int main(void)
             uint32_t filesize;
             filesize = ftell(fp);
 
-            char *pbyte;
-            pbyte = (char *) filesize; // want to pass back to client
+            char * pbyte;
+            pbyte = (char *) &filesize; // want to pass back to client
 
             if (send(new_fd, pbyte, strlen(pbyte), 0) == -1)
                     perror("send");
@@ -144,7 +144,7 @@ int main(void)
                 if (send(new_fd, data, sizeof(data), 0) == -1)
                     perror("send");
             }
-            close(fp);
+            fclose(fp);
             close(new_fd);
             exit(0);
         }
