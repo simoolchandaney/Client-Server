@@ -109,7 +109,6 @@ int main(int argc, char *argv[])
     FILE *fp;
     fp = fopen(argv[3], "w");
     char buffer[BUFSIZ];
-    int n;
 
     while(1) {
         if(recv(sockfd, buffer, BUFSIZ, 0) <= 0)
@@ -117,7 +116,7 @@ int main(int argc, char *argv[])
         fprintf(fp, "%s", buffer);
     }
 
-    close(fp);
+    fclose(fp);
 
 
     buf[numbytes] = '\0';

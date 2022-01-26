@@ -144,7 +144,7 @@ int main(void)
                 if (send(new_fd, data, sizeof(data), 0) == -1)
                     perror("send");
             }
-            close(fp);
+            fclose(fp);
             close(new_fd);
             exit(0);
         }
