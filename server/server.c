@@ -15,8 +15,6 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-#define PORT "41111"  // the port users will be connecting to
-
 #define BACKLOG 10   // how many pending connections queue will hold
 
 void sigchld_handler(int s)
@@ -39,7 +37,7 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
     int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
     struct addrinfo hints, *servinfo, *p;
@@ -50,12 +48,17 @@ int main(void)
     char s[INET6_ADDRSTRLEN];
     int rv;
 
+    if (argc != 2) {
+        fprintf(stderr,"usage: server hostname\n");
+        exit(1);
+    }
+
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE; // use my IP
 
-    if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
+    if ((rv = getaddrinfo(NULL, argv[1], &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
@@ -117,6 +120,11 @@ int main(void)
         char filename[BUFSIZ];
 
         n = recv(new_fd, filename, BUFSIZ, 0);
+        
+        char new_filename[BUFSIZ] = "server/";
+        strcat(new_filename, filename);
+
+        printf("filename: %s\n", new_filename);
         if (n <= 0) {
             perror("recv");
         }
@@ -129,21 +137,27 @@ int main(void)
             close(sockfd); // child doesn't need the listener
 
             char data[BUFSIZ] = {0};
-            FILE *fp = fopen(filename, "r");
+            FILE *fp = fopen(new_filename, "r");
+
             fseek(fp, 0, SEEK_END);
-            uint32_t filesize;
-            filesize = ftell(fp);
 
-            char *pbyte;
-            pbyte = (char *) &filesize; // want to pass back to client
+            uint32_t filesize = ftell(fp);
 
-            if (send(new_fd, pbyte, strlen(pbyte), 0) == -1)
+            //reset file stream
+            fseek(fp, 0, SEEK_SET);
+
+            char * pbyte = (char *) &filesize; // want to pass back to client
+            
+            if (send(new_fd, pbyte, sizeof(pbyte), 0) == -1)
                     perror("send");
+
 
             while(fgets(data, BUFSIZ, fp) != NULL) {
-                if (send(new_fd, data, sizeof(data), 0) == -1)
+
+                if (send(new_fd, data, sizeof(data), MSG_CONFIRM) == -1)
                     perror("send");
             }
+
             fclose(fp);
             close(new_fd);
             exit(0);

@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     int rv;
     char s[INET6_ADDRSTRLEN];
 
-    if (argc != 2) {
+    if (argc != 4) {
         fprintf(stderr,"usage: client hostname\n");
         exit(1);
     }
@@ -103,25 +103,21 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    printf("numbytes: %d\n", numbytes);
     numbytes = htons(numbytes);
+    printf("numbytes: %d\n", numbytes);
 
-    FILE *fp;
-    fp = fopen(argv[3], "w");
+    FILE *fp = fopen(argv[3], "w");
     char buffer[BUFSIZ];
 
     while(1) {
         if(recv(sockfd, buffer, BUFSIZ, 0) <= 0)
             break;
+        //printf("LINE: %s\n", buffer);
         fprintf(fp, "%s", buffer);
     }
 
     fclose(fp);
-
-
-    buf[numbytes] = '\0';
-
-    printf("client: received '%s'\n",buf);
-
     close(sockfd);
 
     return 0;
