@@ -14,6 +14,10 @@
 
 #include <arpa/inet.h>
 
+#pragma once
+#include <time.h>
+#include <sys/time.h>
+
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -22,6 +26,14 @@ void *get_in_addr(struct sockaddr *sa)
     }
 
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+double timestamp() {
+    struct timeval current_time;
+    if (gettimeofday(&current_time, NULL) < 0) {
+        return time(NULL);
+    }
+    return (double) current_time.tv_sec + ((double) current_time.tv_usec / 1000000.0);
 }
 
 int main(int argc, char *argv[])
