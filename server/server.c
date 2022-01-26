@@ -143,9 +143,10 @@ int main(void)
             while(fgets(data, BUFSIZ, fp) != NULL) {
                 if (send(new_fd, data, sizeof(data), 0) == -1)
                     perror("send");
-                close(new_fd);
-                exit(0);
             }
+            close(fp);
+            close(new_fd);
+            exit(0);
         }
         close(new_fd);  // parent doesn't need this
     }
