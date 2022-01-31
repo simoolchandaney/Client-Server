@@ -107,7 +107,10 @@ int main(int argc, char *argv[])
     numbytes = htons(numbytes);
     printf("numbytes: %d\n", numbytes);
 
-    FILE *fp = fopen(argv[3], "w");
+	 char new_filename[BUFSIZ] = "client/";
+	 strcat(new_filename, argv[3]);
+
+    FILE *fp = fopen(new_filename, "w");
     char buffer[BUFSIZ];
 
     while(1) {
