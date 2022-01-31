@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
 
     // send file name to server 
     // argv[3] - file name
+    double t_init_f = timestamp();
     if ((filename = send(sockfd, argv[3], strlen(argv[3]), MSG_CONFIRM)) == -1) {
         perror("recv");
         exit(1);  
@@ -116,6 +117,11 @@ int main(int argc, char *argv[])
         //printf("LINE: %s\n", buffer);
         fprintf(fp, "%s", buffer);
     }
+    double t_final_f = timestamp();
+
+    double time_elapsed = t_final_f - t_init_f;
+    double speed = numbytes*(0.000001) / time_elapsed*(0.000001);
+    printf("%d bytes transferred over %ld for a spoeed of %ld MB/s\n", numbytes, time_elapsed*(0.000001), speed);
 
     fclose(fp);
     close(sockfd);
