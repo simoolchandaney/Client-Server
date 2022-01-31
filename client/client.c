@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 
     // argv[1] - IP
     // argv[2] - port number
+
     if ((rv = getaddrinfo(argv[1], argv[2], &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
@@ -61,7 +62,8 @@ int main(int argc, char *argv[])
 
     // loop through all the results and connect to the first we can
     for(p = servinfo; p != NULL; p = p->ai_next) {
-        if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+        if ((sockfd = socket(p->ai_family, p->ai_socktype,
+                p->ai_protocol)) == -1) {
             perror("client: socket");
             continue;
         }
@@ -71,6 +73,7 @@ int main(int argc, char *argv[])
             perror("client: connect");
             continue;
         }
+
         break;
     }
 
@@ -79,13 +82,15 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof s);
+    inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
+            s, sizeof s);
     printf("client: connecting to %s\n", s);
+
     freeaddrinfo(servinfo); // all done with this structure
 
+	 double t_init_f = timestamp();
     // send file name to server 
     // argv[3] - file name
-    double t_init_f = timestamp();
     if ((filename = send(sockfd, argv[3], strlen(argv[3]), MSG_CONFIRM)) == -1) {
         perror("recv");
         exit(1);  
@@ -93,18 +98,17 @@ int main(int argc, char *argv[])
 
     // receive # of bytes from server (transform from network to host order)
     // loop until we receive complete file
+
     if ((numbytes = recv(sockfd, buf, BUFSIZ-1, 0)) == -1) {
         perror("recv");
         exit(1);
     }
 
-    printf("numbytes: %d\n", numbytes);
-    numbytes = htons(numbytes);
-    printf("numbytes: %d\n", numbytes);
-
-	char new_filename[BUFSIZ] = "client/";
-	strcat(new_filename, argv[3]);
-
+    //printf("numbytes: %d\n", numbytes);
+    //numbytes = htons(numbytes);
+    //printf("numbytes: %d\n", numbytes);
+	 char new_filename[BUFSIZ] = "client/";
+	 strcat(new_filename, argv[3]);
     FILE *fp = fopen(new_filename, "w");
     char buffer[BUFSIZ];
 
@@ -114,12 +118,14 @@ int main(int argc, char *argv[])
         //printf("LINE: %s\n", buffer);
         fprintf(fp, "%s", buffer);
     }
-    double t_final_f = timestamp();
-    double time_elapsed = t_final_f - t_init_f;
-    double speed = numbytes*(0.000001) / time_elapsed*(0.000001);
-    printf("%d bytes transferred over %lf seconds for a spoeed of %lf MB/s\n", numbytes, time_elapsed*(0.000001), speed);
+
+	 double t_final_f = timestamp();
+	 double time_elapsed = t_final_f - t_init_f;
+	 double speed = numbytes * (0.000001) / time_elapsed * (0.000001);
+	 printf("%d bytes transferred over %lf microseconds for a speed of %lf MB/s\n", numbytes, time_elapsed, speed);
 
     fclose(fp);
     close(sockfd);
+
     return 0;
 }
