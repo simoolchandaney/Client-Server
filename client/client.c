@@ -55,8 +55,22 @@ int main(int argc, char *argv[])
 
     // argv[1] - IP
     // argv[2] - port number
+    char *IPbuffer;
 
-    if ((rv = getaddrinfo(argv[1], argv[2], &hints, &servinfo)) != 0) {
+    if (argv[1][0] != '1') {
+        char hostbuffer[BUFSIZ];
+        struct hostent *host_entry;
+
+        // to retrieve host name
+        host_entry = gethostbyname(hostbuffer);
+
+        IPbuffer = inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
+
+    }
+
+    IPbuffer = argv[1];
+
+    if ((rv = getaddrinfo(IPbuffer, argv[2], &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
