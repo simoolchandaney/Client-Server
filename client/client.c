@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 
     // argv[1] - IP
     // argv[2] - port number
-    char *IPbuffer;
+    char *IPbuffer = argv[1];
 
     if (argv[1][0] != '1') {
         char hostbuffer[BUFSIZ];
@@ -64,12 +64,15 @@ int main(int argc, char *argv[])
         // to retrieve host name
         host_entry = gethostbyname(hostbuffer);
 
+        if(host_entry == NULL) {
+            fprintf(stderr, "client: invalid host name\n");
+            return 2;
+        }
         IPbuffer = inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
 
     }
 
-    IPbuffer = argv[1];
-
+    printf("IP: %s\n", IPbuffer);
     if ((rv = getaddrinfo(IPbuffer, argv[2], &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;

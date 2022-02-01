@@ -125,6 +125,7 @@ int main(int argc, char *argv[])
 
         //get file name
         int16_t file_sz = atoi(file_name_length);
+
         char filename[BUFSIZ];
         if(recv(new_fd, filename, file_sz, 0) == -1) {
             perror("recv");
