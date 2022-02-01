@@ -37,7 +37,8 @@ double timestamp() {
 
 int main(int argc, char *argv[])
 {
-    int sockfd, numbytes, filename;  
+    int sockfd;
+    int32_t numbytes;  
     char buf[BUFSIZ];
     struct addrinfo hints, *servinfo, *p;
     int rv;
@@ -88,41 +89,53 @@ int main(int argc, char *argv[])
 
     freeaddrinfo(servinfo); // all done with this structure
 
-	 double t_init_f = timestamp();
-    // send file name to server 
-    // argv[3] - file name
-    if ((filename = send(sockfd, argv[3], strlen(argv[3]), MSG_CONFIRM)) == -1) {
+	double t_init_f = timestamp(); //start timer
+
+    //get size of file name
+    int16_t file_length = strlen(argv[3]);
+    char file_sz[BUFSIZ];
+    sprintf(file_sz, "%d", file_length);
+
+    //send file name length to server
+    if ((send(sockfd, file_sz, sizeof(file_sz), 0)) == -1) {
+        perror("recv");
+        exit(1);  
+    }
+    
+    //send file name to server
+    if ((send(sockfd, argv[3], strlen(argv[3]), 0)) == -1) {
         perror("recv");
         exit(1);  
     }
 
-    // receive # of bytes from server (transform from network to host order)
-    // loop until we receive complete file
-
-    if ((numbytes = recv(sockfd, buf, BUFSIZ-1, 0)) == -1) {
+    // receive # of bytes from server
+    if ((numbytes = recv(sockfd, buf, BUFSIZ, 0)) == -1) {
         perror("recv");
         exit(1);
     }
+    numbytes = atoi(buf);
 
-    //printf("numbytes: %d\n", numbytes);
-    //numbytes = htons(numbytes);
-    //printf("numbytes: %d\n", numbytes);
-	 char new_filename[BUFSIZ] = "client/";
-	 strcat(new_filename, argv[3]);
+    //add prefix to file name so file placed in client directory
+	char new_filename[BUFSIZ] = "client/";
+	strcat(new_filename, argv[3]);
     FILE *fp = fopen(new_filename, "w");
-    char buffer[BUFSIZ];
 
+    char buffer[BUFSIZ] = {0};
+
+    //receive file data and write to file
     while(1) {
         if(recv(sockfd, buffer, BUFSIZ, 0) <= 0)
             break;
-        //printf("LINE: %s\n", buffer);
+        printf("LINE: %s\n", buffer);
         fprintf(fp, "%s", buffer);
+        bzero(buffer, BUFSIZ);
     }
 
-	 double t_final_f = timestamp();
-	 double time_elapsed = t_final_f - t_init_f;
-	 double speed = numbytes * (0.000001) / time_elapsed * (0.000001);
-	 printf("%d bytes transferred over %lf microseconds for a speed of %lf MB/s\n", numbytes, time_elapsed, speed);
+    //compute transmission time
+	double t_final_f = timestamp();
+	double time_elapsed = t_final_f - t_init_f;
+	double speed = (numbytes * (0.000001)) / (time_elapsed * (0.000001));
+	printf("%s bytes transferred over %lf microseconds for a speed of %lf MB/s\n", buf, time_elapsed, speed);
 
     fclose(fp);
     close(sockfd);

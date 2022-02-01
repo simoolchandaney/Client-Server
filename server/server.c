@@ -116,18 +116,26 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        int n;
-        char filename[BUFSIZ];
+        //get length of file name
+        char file_name_length[BUFSIZ];
+        if(recv(new_fd, file_name_length, BUFSIZ, 0) == -1) {
+            perror("recv");
+            exit(1);
+        }
 
-        n = recv(new_fd, filename, BUFSIZ, 0);
+        //get file name
+        int16_t file_sz = atoi(file_name_length);
+        char filename[BUFSIZ];
+        if(recv(new_fd, filename, file_sz, 0) == -1) {
+            perror("recv");
+            exit(1);
+        }
         
+        //adjust file name to place in server directory
         char new_filename[BUFSIZ] = "server/";
         strcat(new_filename, filename);
 
-        printf("filename: %s\n", new_filename);
-        if (n <= 0) {
-            perror("recv");
-        }
+
         inet_ntop(their_addr.ss_family,
             get_in_addr((struct sockaddr *)&their_addr),
             s, sizeof s);
@@ -135,25 +143,34 @@ int main(int argc, char *argv[])
 
         if (!fork()) { // this is the child process
             close(sockfd); // child doesn't need the listener
+            
             char data[BUFSIZ] = {0};
             FILE *fp = fopen(new_filename, "r");
 
+            //get size of file
             fseek(fp, 0, SEEK_END);
-
-            uint32_t filesize = ftell(fp);
+            uint32_t filesize;
+            filesize = ftell(fp);
 
             //reset file stream
             fseek(fp, 0, SEEK_SET);
 
-            char * pbyte = (char *) &filesize; // want to pass back to client
+            //convert filesize to string
+            char pbyte[BUFSIZ];
+            sprintf(pbyte, "%d", filesize);
+
+            //send size of file
             if (send(new_fd, pbyte, sizeof(pbyte), 0) == -1)
-                    perror("send");
+                perror("send");
 
 
+            //send file data in BUFSIZ increments
             while(fgets(data, BUFSIZ, fp) != NULL) {
-
-                if (send(new_fd, data, sizeof(data), MSG_CONFIRM) == -1)
+                printf("data: %s\n", data);
+                if (send(new_fd, data, sizeof(data), 0) == -1)
                     perror("send");
+
+                bzero(data, BUFSIZ);
             }
 
             fclose(fp);
