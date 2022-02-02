@@ -132,11 +132,6 @@ int main(int argc, char *argv[])
             exit(1);
         }
         
-        //adjust file name to place in server directory
-        char new_filename[BUFSIZ] = "server/";
-        strcat(new_filename, filename);
-
-
         inet_ntop(their_addr.ss_family,
             get_in_addr((struct sockaddr *)&their_addr),
             s, sizeof s);
@@ -146,7 +141,7 @@ int main(int argc, char *argv[])
             close(sockfd); // child doesn't need the listener
             
             char data[BUFSIZ] = {0};
-            FILE *fp = fopen(new_filename, "r");
+            FILE *fp = fopen(filename, "r");
 
             //get size of file
             fseek(fp, 0, SEEK_END);

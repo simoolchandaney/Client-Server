@@ -147,9 +147,7 @@ int main(int argc, char *argv[])
 	//printf("numbytes: %d\n", numbytes);
 
     //add prefix to file name so file placed in client directory
-	char new_filename[BUFSIZ] = "client/";
-	strcat(new_filename, argv[3]);
-    FILE *fp = fopen(new_filename, "w");
+    FILE *fp = fopen(argv[3], "w");
 
     char buffer[BUFSIZ] = {0};
 
