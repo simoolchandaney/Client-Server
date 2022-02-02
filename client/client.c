@@ -105,11 +105,19 @@ int main(int argc, char *argv[])
 
 	printf("%s resolved to %s\n", argv[1], ip);
 
-	//char temp[100];
+	char temp1[100];
+	char temp2[100];
+	char temp3[100];
 
-	//if(ip[0] != '1' || ip[1] != '2' || ip[2] != '9' || ip[3] != '.' || ip[4] )
+	strncpy(temp1, &ip[0], 7);
+	strncpy(temp2, &ip[0], 4);
+	strncpy(temp3, &ip[0], 8);
 
-	
+	if(!(strcmp(temp1, "129.74.") == 0 || strcmp(temp2, "127.") == 0 || strcmp(temp3, "192.168.") == 0)) {
+		fprintf(stderr, "Connection from invalid IP\n");
+		exit(1);
+	}
+
 
 	double t_init_f = timestamp(); //start timer
 
