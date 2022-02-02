@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
     numbytes = atoi(buf);
-	printf("numbytes: %d\n", numbytes);
+	//printf("numbytes: %d\n", numbytes);
 
     //add prefix to file name so file placed in client directory
 	char new_filename[BUFSIZ] = "client/";
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
     while(1) {
         if(recv(sockfd, buffer, BUFSIZ, 0) <= 0)
             break;
-        printf("LINE: %s\n", buffer);
+        //printf("LINE: %s\n", buffer);
         fprintf(fp, "%s", buffer);
         bzero(buffer, BUFSIZ);
     }
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     //compute transmission time
 	double t_final_f = timestamp();
 	double time_elapsed = t_final_f - t_init_f;
-	double speed = (numbytes * (0.000001)) / (time_elapsed * (0.000001));
+	double speed = (numbytes * (0.000001)) / (time_elapsed);
 	printf("%s bytes transferred over %lf microseconds for a speed of %lf MB/s\n", buf, time_elapsed, speed);
 
     fclose(fp);
