@@ -8,8 +8,8 @@ TARGET		= proj1client proj1server
 make: $(TARGET)
 
 $(TARGET): client/client.c server/server.c
-	$(CC) $(CFLAGS) -o proj1client client/client.c
-	$(CC) $(CFLAGS) -o proj1server server/server.c 
+	$(CC) $(CFLAGS) -o client/proj1client client/client.c
+	$(CC) $(CFLAGS) -o server/proj1server server/server.c 
 
 clean:
 	@echo "Removing  executables"
