@@ -11,9 +11,9 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-
+#include <limits.h>
+#include <fcntl.h>
 #include <arpa/inet.h>
-
 #include <time.h>
 #include <sys/time.h>
 
@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
     char file_sz[BUFSIZ];
     sprintf(file_sz, "%d", file_length);
 
+
     //send file name length to server
     if ((send(sockfd, file_sz, sizeof(file_sz), 0)) == -1) {
         perror("recv");
@@ -147,26 +148,36 @@ int main(int argc, char *argv[])
 	//printf("numbytes: %d\n", numbytes);
 
     //add prefix to file name so file placed in client directory
-    FILE *fp = fopen(argv[3], "w");
+    //FILE *fp = fopen(argv[3], "w");
+	 int fd = open(argv[3], O_CREAT|O_RDWR|O_APPEND, S_IRUSR | S_IWUSR);
 
     char buffer[BUFSIZ] = {0};
 
     //receive file data and write to file
+    int counter = 0;
     while(1) {
-        if(recv(sockfd, buffer, BUFSIZ, 0) <= 0)
-            break;
-        //printf("LINE: %s\n", buffer);
-        fprintf(fp, "%s", buffer);
-        bzero(buffer, BUFSIZ);
-    }
+		  counter += recv(sockfd, buffer, BUFSIZ, 0);
+
+        printf("LINE: %s\n", buffer);
+
+		  write(fd, buffer, BUFSIZ);
+		  bzero(buffer, BUFSIZ);
+
+		
+		  if(counter >= numbytes) {
+				break;
+    	  }
+
+			
+	}
 
     //compute transmission time
 	double t_final_f = timestamp();
 	double time_elapsed = t_final_f - t_init_f;
 	double speed = (numbytes * (0.000001)) / (time_elapsed);
 	printf("%s bytes transferred over %lf microseconds for a speed of %lf MB/s\n", buf, time_elapsed, speed);
-
-    fclose(fp);
+	 close(fd);
+    //fclose(fp);
     close(sockfd);
 
     return 0;

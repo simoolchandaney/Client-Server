@@ -14,6 +14,7 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <fcntl.h>
 
 #define BACKLOG 10   // how many pending connections queue will hold
 
@@ -142,6 +143,7 @@ int main(int argc, char *argv[])
             
             char data[BUFSIZ] = {0};
             FILE *fp = fopen(filename, "r");
+				int fd = open(filename, O_RDONLY);
 
             //get size of file
             fseek(fp, 0, SEEK_END);
@@ -161,15 +163,24 @@ int main(int argc, char *argv[])
 
 
             //send file data in BUFSIZ increments
-            while(fgets(data, BUFSIZ, fp) != NULL) {
+            int read_val = 0;
+            while(1) {
+	
+					 read_val = read(fd, data, BUFSIZ);
+					 printf("readval: %d\n", read_val);
                 printf("data: %s\n", data);
-                if (send(new_fd, data, sizeof(data), 0) == -1)
+                if (send(new_fd, data, BUFSIZ, 0) == -1)
                     perror("send");
 
                 bzero(data, BUFSIZ);
-            }
 
+					 if(read_val <= 0) {
+						break;
+					 }
+            }
+			
             fclose(fp);
+				close(fd);
             close(new_fd);
             exit(0);
         }
