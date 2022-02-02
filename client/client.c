@@ -158,15 +158,20 @@ int main(int argc, char *argv[])
     while(1) {
 		  counter += recv(sockfd, buffer, BUFSIZ, 0);
 
-        printf("LINE: %s\n", buffer);
+        //printf("LINE: %s\n", buffer);
 
-		  write(fd, buffer, BUFSIZ);
-		  bzero(buffer, BUFSIZ);
+			//printf("bufsiz: %d\n", BUFSIZ);
+			//printf("counter: %d\n", counter);
+		  //buffer[6] = '\0';
 
 		
 		  if(counter >= numbytes) {
+				write(fd, buffer, numbytes % BUFSIZ);
 				break;
     	  }
+			
+		 write(fd, buffer, BUFSIZ);
+		 bzero(buffer, BUFSIZ);
 
 			
 	}
