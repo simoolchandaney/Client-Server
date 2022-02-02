@@ -35,14 +35,17 @@ double timestamp() {
     return (double) current_time.tv_sec + ((double) current_time.tv_usec / 1000000.0);
 }
 
+
 int main(int argc, char *argv[])
 {
     int sockfd;
     int32_t numbytes;  
     char buf[BUFSIZ];
     struct addrinfo hints, *servinfo, *p;
+	 struct sockaddr_in *h;
     int rv;
     char s[INET6_ADDRSTRLEN];
+	 char ip[100];
 
     if (argc != 4) {
         fprintf(stderr,"usage: client hostname\n");
@@ -55,31 +58,23 @@ int main(int argc, char *argv[])
 
     // argv[1] - IP
     // argv[2] - port number
-    char *IPbuffer = argv[1];
+	
 
-    if (argv[1][0] != '1') {
-        char hostbuffer[BUFSIZ];
-        struct hostent *host_entry;
-
-        // to retrieve host name
-        host_entry = gethostbyname(hostbuffer);
-
-        if(host_entry == NULL) {
-            fprintf(stderr, "client: invalid host name\n");
-            return 2;
-        }
-        IPbuffer = inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
-
-    }
-
-    printf("IP: %s\n", IPbuffer);
-    if ((rv = getaddrinfo(IPbuffer, argv[2], &hints, &servinfo)) != 0) {
+    if ((rv = getaddrinfo(argv[1], argv[2], &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
 
     // loop through all the results and connect to the first we can
     for(p = servinfo; p != NULL; p = p->ai_next) {
+			if(argv[1][0] != '1') {
+				printf("IN");
+				h = (struct sockaddr_in *) p->ai_addr;
+				strcpy(ip, inet_ntoa(h->sin_addr));
+			}
+			else {
+				strcpy(ip, argv[1]);
+			}
         if ((sockfd = socket(p->ai_family, p->ai_socktype,
                 p->ai_protocol)) == -1) {
             perror("client: socket");
@@ -106,6 +101,16 @@ int main(int argc, char *argv[])
 
     freeaddrinfo(servinfo); // all done with this structure
 
+	
+
+	printf("%s resolved to %s\n", argv[1], ip);
+
+	//char temp[100];
+
+	//if(ip[0] != '1' || ip[1] != '2' || ip[2] != '9' || ip[3] != '.' || ip[4] )
+
+	
+
 	double t_init_f = timestamp(); //start timer
 
     //get size of file name
@@ -131,6 +136,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
     numbytes = atoi(buf);
+	printf("numbytes: %d\n", numbytes);
 
     //add prefix to file name so file placed in client directory
 	char new_filename[BUFSIZ] = "client/";
