@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
             sprintf(pbyte, "%d", filesize);
 
             //send size of file
-            if (send(new_fd, pbyte, sizeof(pbyte), 0) == -1)
+            if (send(new_fd, pbyte, strlen(pbyte), 0) == -1)
                 perror("send");
 
 
@@ -167,8 +167,8 @@ int main(int argc, char *argv[])
             while(1) {
 	
 					 read_val = read(fd, data, BUFSIZ);
-					 printf("readval: %d\n", read_val);
-                printf("data: %s\n", data);
+					 //printf("readval: %d\n", read_val);
+                //printf("data: %s\n", data);
                 if (send(new_fd, data, BUFSIZ, 0) == -1)
                     perror("send");
 

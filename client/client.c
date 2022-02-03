@@ -128,12 +128,13 @@ int main(int argc, char *argv[])
 
 
     //send file name length to server
-    if ((send(sockfd, file_sz, sizeof(file_sz), 0)) == -1) {
+    if ((send(sockfd, file_sz, strlen(file_sz), 0)) == -1) {
         perror("recv");
         exit(1);  
     }
     
     //send file name to server
+    printf("file: %s\n", argv[3]);
     if ((send(sockfd, argv[3], strlen(argv[3]), 0)) == -1) {
         perror("recv");
         exit(1);  
