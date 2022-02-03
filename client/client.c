@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 
 	
 
-	printf("%s resolved to %s\n", argv[1], ip);
+	//printf("%s resolved to %s\n", argv[1], ip);
 
 	char temp1[100];
 	char temp2[100];
@@ -119,71 +119,76 @@ int main(int argc, char *argv[])
 	}
 
 
-	double t_init_f = timestamp(); //start timer
+	 double t_init_f = timestamp(); //start timer
 
-    //get size of file name
-    int16_t file_length = strlen(argv[3]);
-    char file_sz[BUFSIZ];
-    sprintf(file_sz, "%d", file_length);
-
-
-    //send file name length to server
-    if ((send(sockfd, file_sz, strlen(file_sz), 0)) == -1) {
-        perror("recv");
-        exit(1);  
-    }
     
     //send file name to server
-    printf("file: %s\n", argv[3]);
-    if ((send(sockfd, argv[3], strlen(argv[3]), 0)) == -1) {
+    char *file_name = argv[3]; 
+    //printf("file: %s\n", argv[3]);
+    if ((send(sockfd, file_name, strlen(file_name), 0)) == -1) {
         perror("recv");
         exit(1);  
     }
 
     // receive # of bytes from server
-    if ((numbytes = recv(sockfd, buf, BUFSIZ, 0)) == -1) {
-        perror("recv");
-        exit(1);
-    }
+    if ((numbytes = recv(sockfd, buf, sizeof(buf), 0)) == -1) {
+			perror("recv");
+			exit(1);
+	}
+       
     numbytes = atoi(buf);
-	//printf("numbytes: %d\n", numbytes);
+	printf("numbytes: %d\n", numbytes);
 
     //add prefix to file name so file placed in client directory
-    //FILE *fp = fopen(argv[3], "w");
-	 int fd = open(argv[3], O_CREAT|O_RDWR|O_APPEND, S_IRUSR | S_IWUSR);
+    FILE *fp = fopen(file_name, "w");
+	 int fd = open(argv[3], O_CREAT|O_RDWR, 0666);
 
-    char buffer[BUFSIZ] = {0};
+    char buffer[BUFSIZ];
 
     //receive file data and write to file
     int counter = 0;
+	int temp = 0;
+	printf("numbytes: %d\n", numbytes);
     while(1) {
-		  counter += recv(sockfd, buffer, BUFSIZ, 0);
 
+				if(temp > 1200) {
+					printf("OOPS");
+					break;
+				}
+		  bzero(buffer, sizeof(buffer));
+		  int n= recv(sockfd, buffer, sizeof(buffer), 0);
+
+
+		  counter += n;
+			printf("counter: %d\n", counter);
         //printf("LINE: %s\n", buffer);
 
-			//printf("bufsiz: %d\n", BUFSIZ);
-			//printf("counter: %d\n", counter);
+			printf("n: %d\n", n);
 		  //buffer[6] = '\0';
+			//printf("data: %s\n", buffer);
+			//
+			if(n != 0)
+				write(fd, buffer, n);
 
-		
+				
 		  if(counter >= numbytes) {
-				write(fd, buffer, numbytes % BUFSIZ);
 				break;
     	  }
-			
-		 write(fd, buffer, BUFSIZ);
-		 bzero(buffer, BUFSIZ);
 
+			//write(fd, buffer, sizeof(buffer));
+		//fprintf(fp, "%s", buffer);
 			
+		 //write(fd, buffer, sizeof(buffer));
+		temp++;
 	}
 
     //compute transmission time
 	double t_final_f = timestamp();
 	double time_elapsed = t_final_f - t_init_f;
 	double speed = (numbytes * (0.000001)) / (time_elapsed);
-	printf("%s bytes transferred over %lf microseconds for a speed of %lf MB/s\n", buf, time_elapsed, speed);
+	printf("%d bytes transferred over %lf microseconds for a speed of %lf MB/s\n", numbytes, time_elapsed, speed);
 	 close(fd);
-    //fclose(fp);
+    fclose(fp);
     close(sockfd);
 
     return 0;

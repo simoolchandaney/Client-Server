@@ -118,21 +118,23 @@ int main(int argc, char *argv[])
         }
 
         //get length of file name
-        char file_name_length[BUFSIZ];
-        if(recv(new_fd, file_name_length, BUFSIZ, 0) == -1) {
-            perror("recv");
-            exit(1);
-        }
+        //char file_name_length[BUFSIZ];
+        //if(recv(new_fd, file_name_length, sizeof(file_name_length), 0) == -1) {
+        //    perror("recv");
+            //exit(1);
+
+       // }
 
         //get file name
-        int16_t file_sz = atoi(file_name_length);
+        //int16_t file_sz = atoi(file_name_length);
 
-        char filename[BUFSIZ];
-        if(recv(new_fd, filename, file_sz, 0) == -1) {
-            perror("recv");
-            exit(1);
-        }
+        //char filename[BUFSIZ];
+        //if(recv(new_fd, filename, sizeof(filename), 0) == -1) {
+        //    perror("recv");
+        //    exit(1);
+        //}
         
+		  //char* filename = "test1.txt";
         inet_ntop(their_addr.ss_family,
             get_in_addr((struct sockaddr *)&their_addr),
             s, sizeof s);
@@ -140,10 +142,19 @@ int main(int argc, char *argv[])
 
         if (!fork()) { // this is the child process
             close(sockfd); // child doesn't need the listener
+
+
+
+				char filename[BUFSIZ];
+				//char *filename = "BigFile.pdf";
+				if(recv(new_fd, filename, sizeof(filename), 0) == -1) {
+				  perror("recv");
+					exit(1);
+				}
             
-            char data[BUFSIZ] = {0};
+            char data[BUFSIZ];
+				bzero(data, sizeof(data));
             FILE *fp = fopen(filename, "r");
-				int fd = open(filename, O_RDONLY);
 
             //get size of file
             fseek(fp, 0, SEEK_END);
@@ -153,33 +164,39 @@ int main(int argc, char *argv[])
             //reset file stream
             fseek(fp, 0, SEEK_SET);
 
+				fclose(fp);
+
+				int fd = open(filename, O_RDONLY);
+				if(fd == -1) {
+					perror("[-] Error in reading file.");
+					exit(1);
+				}
             //convert filesize to string
             char pbyte[BUFSIZ];
             sprintf(pbyte, "%d", filesize);
 
             //send size of file
-            if (send(new_fd, pbyte, strlen(pbyte), 0) == -1)
+            if (send(new_fd, pbyte, strlen(pbyte), 0) == -1) {
                 perror("send");
+				}
 
 
             //send file data in BUFSIZ increments
-            int read_val = 0;
-            while(1) {
-	
-					 read_val = read(fd, data, BUFSIZ);
-					 //printf("readval: %d\n", read_val);
-                //printf("data: %s\n", data);
-                if (send(new_fd, data, BUFSIZ, 0) == -1)
-                    perror("send");
+            
+				while(filesize > 0) {
+					int n = read(fd, data, sizeof(data));
+					printf("n: %d\n", n);
+					filesize -= n;
+					//printf("data: %s\n", data);
+					//char new_data[n];
+					//strncpy(new_data, data, n);
+					if(send(new_fd, data, n, 0) == -1) {
+						perror("send");
+						exit(1);
+					}
+					bzero(data, BUFSIZ);
+				} 
 
-                bzero(data, BUFSIZ);
-
-					 if(read_val <= 0) {
-						break;
-					 }
-            }
-			
-            fclose(fp);
 				close(fd);
             close(new_fd);
             exit(0);
