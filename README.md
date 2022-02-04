@@ -21,7 +21,7 @@ Due date: Friday, February 4th @ 10 PM
   port has to be within 41000-41999 range and has to be the same for both commands
 
 ## Performance Metrics & Discussion
-<img width="888" alt="Screen Shot 2022-02-03 at 9 06 13 PM" src="https://user-images.githubusercontent.com/66736756/152460545-1dce8e4f-8738-4ede-9be6-e6853562af9f.png">
+<img width="888" alt="Screen Shot 2022-02-03 at 9 06 13 PM" src="https://user-images.githubusercontent.com/72769479/152586714-64114d41-6799-4984-b97e-0d7839fa5cda.png">
 We can observe that for both small and large files, the avergae total transfer time (ms) is greater for Local Host hence the average speed (MB/s) is also greater.
 
 ## Extra Credit
