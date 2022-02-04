@@ -111,7 +111,6 @@ int main(int argc, char *argv[])
   
     char *file_name = argv[3];
     uint16_t file_name_sz = htons(strlen(file_name));
-    printf("htons: %d\n", file_name_sz);
 	double t_init_f = timestamp(); // start timer
 
     // send size of file name
