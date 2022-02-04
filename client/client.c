@@ -63,6 +63,8 @@ int main(int argc, char *argv[])
 
     // loop through all the results and connect to the first we can
     for(p = servinfo; p != NULL; p = p->ai_next) {
+
+            //EC1 when host name is inputted instead of ip
 			if(argv[1][0] != '1') {
 				h = (struct sockaddr_in *) p->ai_addr;
 				strcpy(ip, inet_ntoa(h->sin_addr));
@@ -91,6 +93,8 @@ int main(int argc, char *argv[])
     printf("client: connecting to %s\n", s);
     freeaddrinfo(servinfo); // all done with this structure
 
+
+    //EC2 filter IPs
 	char temp1[100];
 	char temp2[100];
 	char temp3[100];
@@ -100,11 +104,11 @@ int main(int argc, char *argv[])
 	strncpy(temp3, &ip[0], 8);
 
 	if(!(strcmp(temp1, "129.74.") == 0 || strcmp(temp2, "127.") == 0 || strcmp(temp3, "192.168.") == 0)) {
-		fprintf(stderr, "Connection from invalid IP\n");
+		perror("connection from invalid IP");
 		exit(1);
 	}
     
-    //argv[3];  
+  
     char *file_name = argv[3];
     uint16_t file_name_sz = strlen(file_name);
 	double t_init_f = timestamp(); // start timer
@@ -130,17 +134,31 @@ int main(int argc, char *argv[])
 
 	int fd = open(argv[3], O_CREAT|O_RDWR, 0666);
 
-    char buffer[BUFSIZ];
+    if (fd == -1) {
+        perror("unable to open file");
+    }
+
 
     // receive file data and write to file
+    char buffer[BUFSIZ];
     int counter = 0;
+    int n;
     while(1) {
+
 	    bzero(buffer, sizeof(buffer));
-		int n = recv(sockfd, buffer, sizeof(buffer), 0);
+
+        n = recv(sockfd, buffer, sizeof(buffer), 0);
+		if(n == -1) {
+            perror("recv");
+            exit(1);
+        }
 		counter += n;
 
-		if(n != 0)
-			write(fd, buffer, n);
+		if(n > 0)
+			if(write(fd, buffer, n) == -1) {
+                perror("write");
+                exit(1);
+            }
 	
 		if(counter >= numbytes) {
 			break;

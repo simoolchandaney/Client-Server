@@ -126,8 +126,6 @@ int main(int argc, char *argv[])
                 exit(1);
             }
 
-            printf("received file name length of %d\n", file_name_length);
-
             // receive filename
             char filename[file_name_length + 1];
             filename[file_name_length] = '\0';
@@ -136,17 +134,11 @@ int main(int argc, char *argv[])
                 exit(1);
             }
 
-            printf("received file name of %s\n", filename);
-
-            FILE *fp = fopen(filename, "r");
 
             // get size of file
+            FILE *fp = fopen(filename, "r");
             fseek(fp, 0, SEEK_END);
             uint32_t filesize = ftell(fp);
-
-            // reset file stream
-            fseek(fp, 0, SEEK_SET);
-
 			fclose(fp);
 
             int fd = open(filename, O_RDONLY);
@@ -155,8 +147,6 @@ int main(int argc, char *argv[])
                 exit(1);
             }
 
-            // convert filesize to string
-            printf("sending file size of %d\n", filesize);
             // send size of file
             if (send(new_fd, &filesize, sizeof(filesize), 0) == -1) {
                 perror("send");
@@ -165,9 +155,16 @@ int main(int argc, char *argv[])
 
             // send file data in BUFSIZ increments
             char data[BUFSIZ];
+            int n;
             while(filesize > 0) {
+
                 bzero(data, sizeof(data));
-                int n = read(fd, data, sizeof(data));
+
+                n = read(fd, data, sizeof(data));
+                if(n == -1) {
+                    perror("read");
+                    exit(1);
+                }
                 filesize -= n;
                 if(send(new_fd, data, n, 0) == -1) {
                     perror("send");
