@@ -110,7 +110,8 @@ int main(int argc, char *argv[])
     
   
     char *file_name = argv[3];
-    uint16_t file_name_sz = strlen(file_name);
+    uint16_t file_name_sz = htons(strlen(file_name));
+    printf("htons: %d\n", file_name_sz);
 	double t_init_f = timestamp(); // start timer
 
     // send size of file name
@@ -131,6 +132,7 @@ int main(int argc, char *argv[])
 			perror("recv");
 			exit(1);
 	}
+    numbytes = ntohl(numbytes);
 
 	int fd = open(argv[3], O_CREAT|O_RDWR, 0666);
 

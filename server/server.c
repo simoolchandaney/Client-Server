@@ -126,10 +126,11 @@ int main(int argc, char *argv[])
                 exit(1);
             }
 
+            
             // receive filename
             char filename[file_name_length + 1];
             filename[file_name_length] = '\0';
-            if(recv(new_fd, filename, file_name_length, 0) == -1) {
+            if(recv(new_fd, filename, ntohs(file_name_length), 0) == -1) {
                 perror("recv");
                 exit(1);
             }
@@ -138,7 +139,7 @@ int main(int argc, char *argv[])
             // get size of file
             FILE *fp = fopen(filename, "r");
             fseek(fp, 0, SEEK_END);
-            uint32_t filesize = ftell(fp);
+            uint32_t filesize = htonl(ftell(fp));
 			fclose(fp);
 
             int fd = open(filename, O_RDONLY);
