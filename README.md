@@ -13,9 +13,7 @@ Assigned TAs:
 Due date: Friday, February 4th @ 10 PM
 
 ## Usage
-make (ran in ComputerNetworksProject01 directory): creates ./client/proj1client and ./server/proj1server executables
-
-usage:  
+- make (ran in ComputerNetworksProject01 directory): creates ./client/proj1client and ./server/proj1server executables
 - ./client/project1client IP/hostname port file
 - ./server/proj1server port
         
