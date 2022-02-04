@@ -24,10 +24,10 @@ void *get_in_addr(struct sockaddr *sa)
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in*)sa)->sin_addr);
     }
-
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+// used to calculate time intervals 
 double timestamp() {
     struct timeval current_time;
     if (gettimeofday(&current_time, NULL) < 0) {
@@ -35,7 +35,6 @@ double timestamp() {
     }
     return (double) current_time.tv_sec + ((double) current_time.tv_usec / 1000000.0);
 }
-
 
 int main(int argc, char *argv[])
 {
@@ -57,8 +56,6 @@ int main(int argc, char *argv[])
 
     // argv[1] - IP
     // argv[2] - port number
-	
-
     if ((rv = getaddrinfo(argv[1], argv[2], &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
@@ -67,25 +64,21 @@ int main(int argc, char *argv[])
     // loop through all the results and connect to the first we can
     for(p = servinfo; p != NULL; p = p->ai_next) {
 			if(argv[1][0] != '1') {
-				printf("IN");
 				h = (struct sockaddr_in *) p->ai_addr;
 				strcpy(ip, inet_ntoa(h->sin_addr));
 			}
 			else {
 				strcpy(ip, argv[1]);
 			}
-        if ((sockfd = socket(p->ai_family, p->ai_socktype,
-                p->ai_protocol)) == -1) {
+        if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
             perror("client: socket");
             continue;
         }
-
         if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
             close(sockfd);
             perror("client: connect");
             continue;
         }
-
         break;
     }
 
@@ -94,15 +87,9 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
-            s, sizeof s);
+    inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof s);
     printf("client: connecting to %s\n", s);
-
     freeaddrinfo(servinfo); // all done with this structure
-
-	
-
-	//printf("%s resolved to %s\n", argv[1], ip);
 
 	char temp1[100];
 	char temp2[100];
@@ -116,30 +103,23 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Connection from invalid IP\n");
 		exit(1);
 	}
-
-
+    
+    //argv[3];  
     char *file_name = argv[3];
-    //argv[3]; 
     uint16_t file_name_sz = strlen(file_name);
+	double t_init_f = timestamp(); // start timer
 
-	double t_init_f = timestamp(); //start timer
-
-    //printf("sending file size length of %d\n", file_name_sz);
- 
-    //send size of file name
+    // send size of file name
     if ((send(sockfd, &file_name_sz, sizeof(file_name_sz), 0)) == -1) {
         perror("recv");
         exit(1);  
     }
 
-    //send file name to server 
-    //printf("sending file name %s\n", file_name);
+    // send file name to server 
     if ((send(sockfd, file_name, strlen(file_name), 0)) == -1) {
         perror("recv");
         exit(1);  
     }
-
-    
 
     // receive size of file
     uint32_t numbytes;
@@ -147,19 +127,14 @@ int main(int argc, char *argv[])
 			perror("recv");
 			exit(1);
 	}
-    
-    //printf("received file size of %d\n", numbytes);
 
-
-    //FILE *fp = fopen(file_name, "w");
 	int fd = open(argv[3], O_CREAT|O_RDWR, 0666);
 
     char buffer[BUFSIZ];
 
-    //receive file data and write to file
+    // receive file data and write to file
     int counter = 0;
     while(1) {
-
 	    bzero(buffer, sizeof(buffer));
 		int n = recv(sockfd, buffer, sizeof(buffer), 0);
 		counter += n;
@@ -174,13 +149,13 @@ int main(int argc, char *argv[])
 	close(sockfd);
 	close(fd);
 
-
-    //compute transmission time
+    // end of transmission time
 	double t_final_f = timestamp();
+
+    // statistics calculations and reporting 
 	double time_elapsed = t_final_f - t_init_f;
 	double speed = (numbytes * (0.000001)) / (time_elapsed);
 	printf("%d bytes transferred over %lf microseconds for a speed of %lf MB/s\n", numbytes, time_elapsed, speed);
-
 
     return 0;
 }

@@ -22,9 +22,7 @@ void sigchld_handler(int s)
 {
     // waitpid() might overwrite errno, so we save and restore it:
     int saved_errno = errno;
-
     while(waitpid(-1, NULL, WNOHANG) > 0);
-
     errno = saved_errno;
 }
 
@@ -34,7 +32,6 @@ void *get_in_addr(struct sockaddr *sa)
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in*)sa)->sin_addr);
     }
-
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
@@ -83,7 +80,6 @@ int main(int argc, char *argv[])
             perror("server: bind");
             continue;
         }
-
         break;
     }
 
@@ -117,27 +113,7 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        //get length of file name
-        //char file_name_length[BUFSIZ];
-        //if(recv(new_fd, file_name_length, sizeof(file_name_length), 0) == -1) {
-        //    perror("recv");
-            //exit(1);
-
-       // }
-
-        //get file name
-        //int16_t file_sz = atoi(file_name_length);
-
-        //char filename[BUFSIZ];
-        //if(recv(new_fd, filename, sizeof(filename), 0) == -1) {
-        //    perror("recv");
-        //    exit(1);
-        //}
-        
-		  //char* filename = "test1.txt";
-        inet_ntop(their_addr.ss_family,
-            get_in_addr((struct sockaddr *)&their_addr),
-            s, sizeof s);
+        inet_ntop(their_addr.ss_family,get_in_addr((struct sockaddr *)&their_addr),s, sizeof s);
         printf("server: got connection from %s\n", s);
 
         if (!fork()) { // this is the child process
@@ -151,9 +127,8 @@ int main(int argc, char *argv[])
             }
 
             printf("received file name length of %d\n", file_name_length);
-       
 
-            //receive filename
+            // receive filename
             char filename[file_name_length + 1];
             filename[file_name_length] = '\0';
             if(recv(new_fd, filename, file_name_length, 0) == -1) {
@@ -162,16 +137,14 @@ int main(int argc, char *argv[])
             }
 
             printf("received file name of %s\n", filename);
-   
 
-            
             FILE *fp = fopen(filename, "r");
 
-            //get size of file
+            // get size of file
             fseek(fp, 0, SEEK_END);
             uint32_t filesize = ftell(fp);
 
-            //reset file stream
+            // reset file stream
             fseek(fp, 0, SEEK_SET);
 
 			fclose(fp);
@@ -182,17 +155,15 @@ int main(int argc, char *argv[])
                 exit(1);
             }
 
-            //convert filesize to string
-  
+            // convert filesize to string
             printf("sending file size of %d\n", filesize);
-            //send size of file
+            // send size of file
             if (send(new_fd, &filesize, sizeof(filesize), 0) == -1) {
                 perror("send");
                 exit(1);
 			}
 
-            
-            //send file data in BUFSIZ increments
+            // send file data in BUFSIZ increments
             char data[BUFSIZ];
             while(filesize > 0) {
                 bzero(data, sizeof(data));
