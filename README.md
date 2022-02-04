@@ -22,7 +22,7 @@ Due date: Friday, February 4th @ 10 PM
 
 ## Performance Metrics & Discussion
 <img width="888" alt="Screen Shot 2022-02-03 at 9 06 13 PM" src="https://user-images.githubusercontent.com/72769479/152586714-64114d41-6799-4984-b97e-0d7839fa5cda.png">
-We can observe that for both small and large files, the average total transfer time (ms) is greater for Local Host hence the average speed (MB/s) is also greater. The total transfer time was also less for the smaller file when using different student machines than running on localhost. For transferring a larger file, the time was actually greater on different student machines than on localhost, which is what we would expect. This also means that the average speed for transferring across different student machines was less than transferring on localhost. 
+We can observe that the average total transfer time is greater on local for the small file (which is why the average speed is smaller for when running on local host because time and speed are inversely proportional). We can observe that the opposite occurs for the large file.
 
 ## Extra Credit
 - [X] Support the usage of a host name in addition to an IP address for the first argument of the client
