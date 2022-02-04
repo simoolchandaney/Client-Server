@@ -173,8 +173,8 @@ int main(int argc, char *argv[])
 
     // statistics calculations and reporting 
 	double time_elapsed = t_final_f - t_init_f;
-	double speed = (numbytes * (0.000001)) / ((time_elapsed) * (0.000001));
-	printf("%d bytes transferred over %lf microseconds for a speed of %lf MB/s\n", numbytes, time_elapsed, speed);
+	double speed = (numbytes * (0.000001)) / (time_elapsed) ;
+	printf("%d bytes transferred over %lf seconds for a speed of %lf MB/s\n", numbytes, time_elapsed, speed);
 
     return 0;
 }
