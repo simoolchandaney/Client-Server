@@ -21,7 +21,8 @@ Due date: Friday, February 4th @ 10 PM
   port has to be within 41000-41999 range and has to be the same for both commands
 
 ## Performance Metrics
-![image](https://user-images.githubusercontent.com/72769479/152460291-f5ae63a4-dcb0-4265-bca7-5334c19a0a1e.png)
+<img width="888" alt="Screen Shot 2022-02-03 at 9 06 13 PM" src="https://user-images.githubusercontent.com/66736756/152460545-1dce8e4f-8738-4ede-9be6-e6853562af9f.png">
+We can observe that for both small and large files, the avergae total transfer time (ms) is greater for Local Host hence the average speed (MB/s) is also greater.
 
 ## Extra Credit
 - [X] Support the usage of a host name in addition to an IP address for the first argument of the client
