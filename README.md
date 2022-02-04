@@ -21,7 +21,7 @@ Due date: Friday, February 4th @ 10 PM
   port has to be within 41000-41999 range and has to be the same for both commands
   
 ## Extra Credit
-[X] Support the usage of a host name in addition to an IP address for the first argument of the client
-[X] Allow connections to arrive only from the 129.74.* address range, localhost (127.*), or the private network (192.168.*)
+- [X] Support the usage of a host name in addition to an IP address for the first argument of the client
+- [X] Allow connections to arrive only from the 129.74.* address range, localhost (127.*), or the private network (192.168.*)
   
 ![image](https://user-images.githubusercontent.com/72769479/152458860-3c42a083-ab18-432c-ae12-41334dc65e87.png)
