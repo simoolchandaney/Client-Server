@@ -16,6 +16,7 @@
 #include <arpa/inet.h>
 #include <time.h>
 #include <sys/time.h>
+#include <arpa/inet.h>
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -39,13 +40,11 @@ double timestamp() {
 int main(int argc, char *argv[])
 {
     int sockfd;
-    int32_t numbytes;  
-    char buf[BUFSIZ];
     struct addrinfo hints, *servinfo, *p;
-	 struct sockaddr_in *h;
+	struct sockaddr_in *h;
     int rv;
     char s[INET6_ADDRSTRLEN];
-	 char ip[100];
+	char ip[100];
 
     if (argc != 4) {
         fprintf(stderr,"usage: client hostname\n");
@@ -119,77 +118,69 @@ int main(int argc, char *argv[])
 	}
 
 
-	 double t_init_f = timestamp(); //start timer
+    char *file_name = argv[3];
+    //argv[3]; 
+    uint16_t file_name_sz = strlen(file_name);
 
-    
-    //send file name to server
-    char *file_name = argv[3]; 
-    //printf("file: %s\n", argv[3]);
+	double t_init_f = timestamp(); //start timer
+
+    //printf("sending file size length of %d\n", file_name_sz);
+ 
+    //send size of file name
+    if ((send(sockfd, &file_name_sz, sizeof(file_name_sz), 0)) == -1) {
+        perror("recv");
+        exit(1);  
+    }
+
+    //send file name to server 
+    //printf("sending file name %s\n", file_name);
     if ((send(sockfd, file_name, strlen(file_name), 0)) == -1) {
         perror("recv");
         exit(1);  
     }
 
-    // receive # of bytes from server
-    if ((numbytes = recv(sockfd, buf, sizeof(buf), 0)) == -1) {
+    
+
+    // receive size of file
+    uint32_t numbytes;
+    if ((recv(sockfd, &numbytes, sizeof(numbytes), 0)) == -1) {
 			perror("recv");
 			exit(1);
 	}
-       
-    numbytes = atoi(buf);
-	printf("numbytes: %d\n", numbytes);
+    
+    //printf("received file size of %d\n", numbytes);
 
-    //add prefix to file name so file placed in client directory
-    FILE *fp = fopen(file_name, "w");
-	 int fd = open(argv[3], O_CREAT|O_RDWR, 0666);
+
+    //FILE *fp = fopen(file_name, "w");
+	int fd = open(argv[3], O_CREAT|O_RDWR, 0666);
 
     char buffer[BUFSIZ];
 
     //receive file data and write to file
     int counter = 0;
-	int temp = 0;
-	printf("numbytes: %d\n", numbytes);
     while(1) {
 
-				if(temp > 1200) {
-					printf("OOPS");
-					break;
-				}
-		  bzero(buffer, sizeof(buffer));
-		  int n= recv(sockfd, buffer, sizeof(buffer), 0);
+	    bzero(buffer, sizeof(buffer));
+		int n = recv(sockfd, buffer, sizeof(buffer), 0);
+		counter += n;
 
-
-		  counter += n;
-			printf("counter: %d\n", counter);
-        //printf("LINE: %s\n", buffer);
-
-			printf("n: %d\n", n);
-		  //buffer[6] = '\0';
-			//printf("data: %s\n", buffer);
-			//
-			if(n != 0)
-				write(fd, buffer, n);
-
-				
-		  if(counter >= numbytes) {
-				break;
-    	  }
-
-			//write(fd, buffer, sizeof(buffer));
-		//fprintf(fp, "%s", buffer);
-			
-		 //write(fd, buffer, sizeof(buffer));
-		temp++;
+		if(n != 0)
+			write(fd, buffer, n);
+	
+		if(counter >= numbytes) {
+			break;
+    	}
 	}
+	close(sockfd);
+	close(fd);
+
 
     //compute transmission time
 	double t_final_f = timestamp();
 	double time_elapsed = t_final_f - t_init_f;
 	double speed = (numbytes * (0.000001)) / (time_elapsed);
 	printf("%d bytes transferred over %lf microseconds for a speed of %lf MB/s\n", numbytes, time_elapsed, speed);
-	 close(fd);
-    fclose(fp);
-    close(sockfd);
+
 
     return 0;
 }
