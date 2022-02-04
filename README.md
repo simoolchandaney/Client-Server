@@ -21,3 +21,4 @@ Due date: Friday, February 4th @ 10 PM
   port has to be within 41000-41999 range and has to be the same for both commands
   
   
+![image](https://user-images.githubusercontent.com/72769479/152458860-3c42a083-ab18-432c-ae12-41334dc65e87.png)
