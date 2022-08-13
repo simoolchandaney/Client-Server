@@ -1,5 +1,4 @@
-# ComputerNetworksProject01
-Computer Networks Project 1 Repository
+# Client Server
 
 Group members:
 - Ian Havenaar
